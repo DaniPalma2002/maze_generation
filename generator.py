@@ -1,5 +1,5 @@
-from telnetlib import STATUS
 import numpy as np
+from tkinter import *
 
 # the maze will be a list of nodes
 # each node will have a list of walls
@@ -15,6 +15,21 @@ class node:
         return f'({self.state}|{self.wall})'
 
 
+def gui_print(maze):
+    maze = maze.reshape(MAZE_SIZE, MAZE_SIZE)
+    win = Tk()
+    text = Text(win)
+    text.pack()
+
+    for i in maze:
+        for j in i:
+            text.insert(END, j)
+        text.insert(END, '\n')
+
+    win.mainloop()
+
+
+
 
 
 if __name__ == "__main__":
@@ -22,5 +37,5 @@ if __name__ == "__main__":
     for i in range(len(maze)):
         maze[i] = node()
 
-    print(maze)
+    gui_print(maze)
 
