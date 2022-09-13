@@ -7,6 +7,9 @@ const COLS  = 10;
 var grid = []; // matrix
 var queue = []; // backtracking queue
 var current; // current cell being visited
+var bias_list = ['N', 'R', 'O']; // N - Recursive backtracker - newest
+                                // R - Prim - random
+                                // O - Oldest
 
 function setup() {
     createCanvas(COLS*CELL_SIZE, ROWS*CELL_SIZE);
@@ -17,20 +20,28 @@ function setup() {
             grid.push(node);
         }
     }
-    current = grid[get_random_int(0, grid.length)]
-    console.log(current.neighbours())
-    //console.log(current.neighbours)
+    // choose first node
+    current = grid[/*get_random_int(0, grid.length)*/0]
+    //console.log(grid[10].neighbours())
+    queue.push(current.grid_place)
+    current.state = 1
+    
+
+    //next_node = choose_node(bias)
     
     
 }
 
 // function that loops
 function draw() {
-    background(50);
+    //background(50);
     for (var i = 0; i < grid.length; i++) {
         grid[i].show();
     }
-    current.state = 1
+
+    carve_path();
+
+    
 }
 
 
@@ -66,13 +77,15 @@ function Node(i, j) {
         n_col = n_col.filter(item => (item > 0  && grid[item].i == this.i && grid[item].state == 0))
         n_row = [this.grid_place-1, this.grid_place+1]
         n_row = n_row.filter(item => (item > 0  && grid[item].j == this.j && grid[item].state == 0))
-        return n_col.concat(n_row)
+        a = n_col.concat(n_row)
+        //console.log(a)
+        return shuffle_array(a)
     }
 
 }
 
-function choose_element_of_queue(bias, grid) {
-    return 0
+function choose_element_of_queue(bias) {
+    if (bias == 'N') return (queue.length - 1)
 }
 
 // return int random between min (inclusive) and max (exclusive)
@@ -82,3 +95,42 @@ function get_random_int(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+
+function shuffle_array(array) {
+    let currentIndex = array.length,  randomIndex;
+
+    // While there remain elements to shuffle.
+    while (currentIndex != 0) {
+
+        // Pick a remaining element.
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [
+        array[randomIndex], array[currentIndex]];
+    }
+
+    return array;
+}
+
+
+function carve_path() {
+    
+    index = choose_element_of_queue(bias_list[0]) // index of queue
+    //console.log(index)
+    current = queue[index]
+    console.log(current)
+    n = grid[current].neighbours() 
+    console.log(n)
+    if (!(n.length === 0)) {
+        next_node = n[0]
+        console.log(grid[next_node].neighbours())
+        grid[next_node].state = 1
+        queue.push(next_node)
+    }
+    else {
+        queue.splice(current, 1)
+    }
+    console.log('----')
+}
