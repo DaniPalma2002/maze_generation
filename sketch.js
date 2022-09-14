@@ -1,9 +1,9 @@
 // Daniel Pereira
 // Growing Tree algorithm
-// todo does not work if not a square
+
 const CELL_SIZE = 40; // px
-const ROWS = 10;
-const COLS  = 50;
+const ROWS = 19;
+const COLS  = 19;
 var grid = []; // matrix
 var queue = []; // backtracking queue
 var current; // current cell being visited
@@ -20,6 +20,8 @@ var theme = [220, 10, 4] // background, stroke color, stroke weight
 
 function setup() {
     
+    //user_input()
+
     createCanvas(COLS*CELL_SIZE, ROWS*CELL_SIZE);
 
     for (var i = 0; i < ROWS; i++) {
@@ -187,6 +189,3 @@ function remove_walls(curr, next) {
 }
 
 
-function user_input() {
-
-}
