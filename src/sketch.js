@@ -2,8 +2,8 @@
 // Growing Tree algorithm
 
 const CELL_SIZE = 20; // px
-const ROWS = 5;
-const COLS  = 5;
+const ROWS = 50;
+const COLS  = 50;
 var grid = []; // matrix
 var queue = []; // backtracking queue
 var current; // current cell being visited
@@ -14,7 +14,7 @@ var bias_list = ['N', 'R', 'O']; // N - Recursive backtracker - newest
 
 function setup() {
     createCanvas(COLS*CELL_SIZE, ROWS*CELL_SIZE);
-    frameRate(10)
+    //frameRate(10)
 
     for (var i = 0; i < ROWS; i++) {
         for (var j = 0; j < COLS; j++) {
@@ -24,11 +24,11 @@ function setup() {
     }
 
     // choose first node
-    current = grid[/*get_random_int(0, grid.length)*/0]
+    current = grid[/*get_random_int(0, grid.length)*/0].grid_place
     //console.log(grid[10].neighbours())
-    queue.push(current.grid_place)
-    current.state = 1
-    current.wall[1] = 0
+    queue.push(current)
+    grid[current].state = 1
+    //grid[current].wall[1] = 0
     //current.wall[1] = 0
     
 
@@ -39,11 +39,11 @@ function setup() {
 
 // function that loops
 function draw() {
-    //background(50);
+    background(0);
     for (var i = 0; i < grid.length; i++) {
         grid[i].show();
     }
-    
+    //grid[1].wall[1] = 0
     if (queue.length === 0) noLoop()
     carve_path();
     
@@ -63,8 +63,8 @@ function Node(i, j) {
         var x = this.i * CELL_SIZE;
         var y = this.j * CELL_SIZE;
         stroke(200);
-        //strokeWeight(1);
-        var padding = CELL_SIZE*0.9
+        strokeWeight(1.5);
+        var padding = CELL_SIZE*1
         //rect(x, y, CELL_SIZE, CELL_SIZE);
         if (this.wall[0] == 1) line(x, y, x + padding, y); // top
         if (this.wall[1] == 1) line(x + padding, y, x + padding, y + padding); // right 
@@ -149,7 +149,7 @@ function carve_path() {
     //console.log(index)
     if (queue.length == 0) return
     current = queue[index]
-    console.log('curr',current)
+    //console.log('curr',current)
     //console.log('queue',queue.length)
     n = grid[current].neighbours() 
     //console.log('state',grid[current].state)
@@ -158,15 +158,23 @@ function carve_path() {
         next_node = n[0]
         //console.log('n [0] state',grid[next_node].state)
         grid[next_node].state = 1
-        //remove_walls()
+        //grid[next_node].wall[1] = 0
+        var curr_wall, next_wall;
+        [curr_wall, next_wall] = remove_walls(current, next_node)
+        if (!(curr_wall == 0 && next_wall == 0)) {
+            grid[current].wall[curr_wall] = 0
+            grid[next_node].wall[next_wall] = 0
+        }
         queue.push(next_node)
+        //return [curr_wall, next_wall]
     }
     else {
-        console.log('remove', index)
+        //console.log('remove', index)
         queue.splice(index, 1)
+        //return []
         //console.log('queue rem',queue.length)
     }
-    console.log('----')
+    //console.log('----')
 }
 
 
@@ -174,12 +182,23 @@ function keyPressed() {
     noLoop();
 }
 
-function remove_walls() {
+function remove_walls(curr, next) {
     // find what walls to remove between current and next_node
-    console.log('curr, next', current, next_node)
-    if (current == next_node-1) { // left of current
-        grid[current].wall[1] = 0
-        grid[next_node].wall[3] = 0
+    //console.log('curr, next', current, next_node)
+    if (curr == next-1) { // right
+        //console.log('yes')
+        return [1, 3]
+
     }
+    else if (curr == next+1) { // left
+        return [3, 1]
+    }
+    else if (curr - COLS == next) { // top
+        return [0, 2]
+    }
+    else if (curr + COLS == next) { // left
+        return [2, 0]
+    }
+    return [0, 0]
     
 }
