@@ -13,6 +13,7 @@ var bias_list = ['N', 'R', 'O']; // N - Recursive backtracker - newest
 
 function setup() {
     createCanvas(COLS*CELL_SIZE, ROWS*CELL_SIZE);
+    frameRate(1)
 
     for (var i = 0; i < ROWS; i++) {
         for (var j = 0; j < COLS; j++) {
@@ -38,7 +39,6 @@ function draw() {
     for (var i = 0; i < grid.length; i++) {
         grid[i].show();
     }
-
     carve_path();
 
     
@@ -73,12 +73,32 @@ function Node(i, j) {
     }
 
     this.neighbours = function() {
-        n_col = [this.grid_place-COLS, this.grid_place+COLS];
-        n_col = n_col.filter(item => (item > 0  && grid[item].i == this.i && grid[item].state == 0))
+
+        var n_col = [this.grid_place-COLS, this.grid_place+COLS];
+        //console.log('col1', n_col)
+        n_col = n_col.filter(item => (item > 0  && item < grid.length))
+        var n_col2 = []
+        for (var i = 0; i < n_col.length; i++) {
+            index = n_col[i]
+            if (grid[index].i == this.i && grid[index].state == 0)
+                n_col2.push(index)
+        }
+        //console.log('col2', n_col)
+
         n_row = [this.grid_place-1, this.grid_place+1]
-        n_row = n_row.filter(item => (item > 0  && grid[item].j == this.j && grid[item].state == 0))
+        n_row = n_row.filter(item => (item > 0  && item < grid.length))
+        //grid[item].j == this.j && grid[item].state == 0
+        n_row2 = []
+        for (var i = 0; i < n_row.length; i++) {
+            index = n_row[i]
+            if (grid[index].j == this.j && grid[index].state == 0)
+                n_row2.push(index)
+        }
+
+
+
         a = n_col.concat(n_row)
-        //console.log(a)
+        //console.log('a' , a)
         return shuffle_array(a)
     }
 
@@ -125,12 +145,12 @@ function carve_path() {
     console.log(n)
     if (!(n.length === 0)) {
         next_node = n[0]
-        console.log(grid[next_node].neighbours())
+        //console.log(grid[next_node].neighbours())
         grid[next_node].state = 1
         queue.push(next_node)
     }
     else {
-        queue.splice(current, 1)
+        queue.splice(index, 1)
     }
     console.log('----')
 }
