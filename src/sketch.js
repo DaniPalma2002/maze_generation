@@ -2,18 +2,19 @@
 // Growing Tree algorithm
 
 const CELL_SIZE = 20; // px
-const ROWS = 10;
-const COLS  = 10;
+const ROWS = 5;
+const COLS  = 5;
 var grid = []; // matrix
 var queue = []; // backtracking queue
 var current; // current cell being visited
+var next_node;
 var bias_list = ['N', 'R', 'O']; // N - Recursive backtracker - newest
                                 // R - Prim - random
                                 // O - Oldest
 
 function setup() {
     createCanvas(COLS*CELL_SIZE, ROWS*CELL_SIZE);
-    frameRate(1)
+    frameRate(10)
 
     for (var i = 0; i < ROWS; i++) {
         for (var j = 0; j < COLS; j++) {
@@ -21,11 +22,14 @@ function setup() {
             grid.push(node);
         }
     }
+
     // choose first node
     current = grid[/*get_random_int(0, grid.length)*/0]
     //console.log(grid[10].neighbours())
     queue.push(current.grid_place)
     current.state = 1
+    current.wall[1] = 0
+    //current.wall[1] = 0
     
 
     //next_node = choose_node(bias)
@@ -39,8 +43,10 @@ function draw() {
     for (var i = 0; i < grid.length; i++) {
         grid[i].show();
     }
+    
+    if (queue.length === 0) noLoop()
     carve_path();
-
+    
     
 }
 
@@ -58,18 +64,20 @@ function Node(i, j) {
         var y = this.j * CELL_SIZE;
         stroke(200);
         //strokeWeight(1);
-        var padding = CELL_SIZE*1
+        var padding = CELL_SIZE*0.9
         //rect(x, y, CELL_SIZE, CELL_SIZE);
         if (this.wall[0] == 1) line(x, y, x + padding, y); // top
         if (this.wall[1] == 1) line(x + padding, y, x + padding, y + padding); // right 
         if (this.wall[2] == 1) line(x, y + padding, x + padding, y + padding); // bottom
         if (this.wall[3] == 1) line(x, y, x, y + padding); // left
-        if (this.state == 1)  {
+        /*if (this.state == 1)  {
             //circle(x + padding/2, y + padding/2, 5)
-            //noStroke()
+            
             fill(10, 41, 66)
-            rect(x, y, padding, padding)
-        }
+            circle(x, y)
+            //rect(x, y, padding, padding)
+        }*/
+        //console.log(this.wall)
     }
 
     this.neighbours = function() {
@@ -97,7 +105,7 @@ function Node(i, j) {
 
 
 
-        a = n_col.concat(n_row)
+        a = n_col2.concat(n_row2)
         //console.log('a' , a)
         return shuffle_array(a)
     }
@@ -137,20 +145,41 @@ function shuffle_array(array) {
 
 function carve_path() {
     
-    index = choose_element_of_queue(bias_list[0]) // index of queue
+    var index = choose_element_of_queue(bias_list[0]) // index of queue
     //console.log(index)
+    if (queue.length == 0) return
     current = queue[index]
-    console.log(current)
+    console.log('curr',current)
+    //console.log('queue',queue.length)
     n = grid[current].neighbours() 
-    console.log(n)
+    //console.log('state',grid[current].state)
+    //console.log(n)
     if (!(n.length === 0)) {
         next_node = n[0]
-        //console.log(grid[next_node].neighbours())
+        //console.log('n [0] state',grid[next_node].state)
         grid[next_node].state = 1
+        //remove_walls()
         queue.push(next_node)
     }
     else {
+        console.log('remove', index)
         queue.splice(index, 1)
+        //console.log('queue rem',queue.length)
     }
     console.log('----')
+}
+
+
+function keyPressed() {
+    noLoop();
+}
+
+function remove_walls() {
+    // find what walls to remove between current and next_node
+    console.log('curr, next', current, next_node)
+    if (current == next_node-1) { // left of current
+        grid[current].wall[1] = 0
+        grid[next_node].wall[3] = 0
+    }
+    
 }
