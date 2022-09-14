@@ -2,8 +2,8 @@
 // Growing Tree algorithm
 // todo does not work if not a square
 const CELL_SIZE = 40; // px
-const ROWS = 40;
-const COLS  = 40;
+const ROWS = 10;
+const COLS  = 50;
 var grid = []; // matrix
 var queue = []; // backtracking queue
 var current; // current cell being visited
@@ -49,13 +49,15 @@ function draw() {
     
 }
 
+//------------------------------------------------------------------------------
+
 
 function Node(i, j) {
     this.i = i;
     this.j = j;
     this.state = 0 // if is visited
     this.wall = [1,1,1,1] // top, right, bottom, left
-    this.grid_place = this.j * ROWS + this.i //index in grid
+    this.grid_place = this.j * COLS + this.i //index in grid
 
 
     this.show = function() {
@@ -182,4 +184,9 @@ function remove_walls(curr, next) {
     // protection measure, not supposed to happen
     return [0, 0]
     
+}
+
+
+function user_input() {
+
 }
