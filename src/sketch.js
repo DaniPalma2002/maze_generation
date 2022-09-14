@@ -1,9 +1,9 @@
 // Daniel Pereira
 // Growing Tree algorithm
-
+// todo does not work if not a square
 const CELL_SIZE = 20; // px
-const ROWS = 50;
-const COLS  = 50;
+const ROWS = 20;
+const COLS  = 20;
 var grid = []; // matrix
 var queue = []; // backtracking queue
 var current; // current cell being visited
@@ -12,9 +12,12 @@ var bias_list = ['N', 'R', 'O']; // N - Recursive backtracker - newest
                                 // R - Prim - random
                                 // O - Oldest
 
+var white_theme = [10, 220] // 2 values for line color and background color
+
+
 function setup() {
+    
     createCanvas(COLS*CELL_SIZE, ROWS*CELL_SIZE);
-    //frameRate(10)
 
     for (var i = 0; i < ROWS; i++) {
         for (var j = 0; j < COLS; j++) {
@@ -24,7 +27,7 @@ function setup() {
     }
 
     // choose first node
-    current = grid[/*get_random_int(0, grid.length)*/0].grid_place
+    current = grid[get_random_int(0, grid.length)].grid_place
     //console.log(grid[10].neighbours())
     queue.push(current)
     grid[current].state = 1
@@ -39,7 +42,7 @@ function setup() {
 
 // function that loops
 function draw() {
-    background(0);
+    background(220);
     for (var i = 0; i < grid.length; i++) {
         grid[i].show();
     }
@@ -62,22 +65,15 @@ function Node(i, j) {
     this.show = function() {
         var x = this.i * CELL_SIZE;
         var y = this.j * CELL_SIZE;
-        stroke(200);
+        stroke(10);
         strokeWeight(1.5);
         var padding = CELL_SIZE*1
-        //rect(x, y, CELL_SIZE, CELL_SIZE);
         if (this.wall[0] == 1) line(x, y, x + padding, y); // top
         if (this.wall[1] == 1) line(x + padding, y, x + padding, y + padding); // right 
         if (this.wall[2] == 1) line(x, y + padding, x + padding, y + padding); // bottom
         if (this.wall[3] == 1) line(x, y, x, y + padding); // left
         /*if (this.state == 1)  {
-            //circle(x + padding/2, y + padding/2, 5)
-            
-            fill(10, 41, 66)
-            circle(x, y)
-            //rect(x, y, padding, padding)
         }*/
-        //console.log(this.wall)
     }
 
     this.neighbours = function() {
@@ -85,29 +81,30 @@ function Node(i, j) {
         var n_col = [this.grid_place-COLS, this.grid_place+COLS];
         //console.log('col1', n_col)
         n_col = n_col.filter(item => (item > 0  && item < grid.length))
-        var n_col2 = []
+        n_col = n_col.filter(item => (grid[item].i == this.i && grid[item].state == 0))
+        /*var n_col2 = []
         for (var i = 0; i < n_col.length; i++) {
             index = n_col[i]
             if (grid[index].i == this.i && grid[index].state == 0)
                 n_col2.push(index)
-        }
-        //console.log('col2', n_col)
+        }*/
 
-        n_row = [this.grid_place-1, this.grid_place+1]
-        n_row = n_row.filter(item => (item > 0  && item < grid.length))
+        var n_row = [this.grid_place-1, this.grid_place+1]
+        n_row = n_row.filter(item => (item >= 0  && item < grid.length))
+        n_row = n_row.filter(item => (grid[item].j == this.j && grid[item].state == 0))
         //grid[item].j == this.j && grid[item].state == 0
-        n_row2 = []
+        /*n_row2 = []
         for (var i = 0; i < n_row.length; i++) {
             index = n_row[i]
             if (grid[index].j == this.j && grid[index].state == 0)
                 n_row2.push(index)
-        }
+        }*/
 
 
 
-        a = n_col2.concat(n_row2)
+        a = n_col.concat(n_row)
         //console.log('a' , a)
-        return shuffle_array(a)
+        return a
     }
 
 }
@@ -146,19 +143,18 @@ function shuffle_array(array) {
 function carve_path() {
     
     var index = choose_element_of_queue(bias_list[0]) // index of queue
-    //console.log(index)
+    
     if (queue.length == 0) return
     current = queue[index]
-    //console.log('curr',current)
-    //console.log('queue',queue.length)
+    console.log(current)
     n = grid[current].neighbours() 
-    //console.log('state',grid[current].state)
-    //console.log(n)
+    
     if (!(n.length === 0)) {
-        next_node = n[0]
-        //console.log('n [0] state',grid[next_node].state)
+        var rand = get_random_int(0, n.length - 1);
+        //console.log(n, rand)
+        next_node = n[rand];
+        
         grid[next_node].state = 1
-        //grid[next_node].wall[1] = 0
         var curr_wall, next_wall;
         [curr_wall, next_wall] = remove_walls(current, next_node)
         if (!(curr_wall == 0 && next_wall == 0)) {
@@ -188,7 +184,6 @@ function remove_walls(curr, next) {
     if (curr == next-1) { // right
         //console.log('yes')
         return [1, 3]
-
     }
     else if (curr == next+1) { // left
         return [3, 1]
