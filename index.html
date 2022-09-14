@@ -10,11 +10,11 @@
   <body>
     
     <label for="row_input">Rows</label>
-    <input type="number" id="row_input"><br>
+    <input type="number" id="row_input" onkeyup="if(event.keyCode===13){submit.click()}"><br>
     <label for="col_input">Collumns</label>
-    <input type="number" id="col_input"><br>
-    <button id="submit">New Maze</button>
-    <br><br>
+    <input type="number" id="col_input" onkeyup="if(event.keyCode===13){submit.click()}"><br>
+    <button id="submit">New Maze</button><br>
+    <br>
     <script src="sketch.js"></script>
     <script src="support.js"></script>
   </body>
