@@ -8,11 +8,14 @@ var grid = []; // matrix
 var queue = []; // backtracking queue
 var current; // current cell being visited
 var next_node;
-var bias_list = ['N', 'R', 'O']; // N - Recursive backtracker - newest
-                                // R - Prim - random
-                                // O - Oldest
+var bias_list = ['N', 'R', 'O', 'M', 'N/R(75/25)']; 
+    // N - Recursive backtracker - newest
+    // R - Prim - random
+    // O - Oldest
+    // M - Middle
+    // N/R(75/25) Newest/Random, 75/25 split
 
-var white_theme = [10, 220] // 2 values for line color and background color
+var theme = [220, 10, 4] // background, stroke color, stroke weight
 
 
 function setup() {
@@ -28,25 +31,18 @@ function setup() {
 
     // choose first node
     current = grid[get_random_int(0, grid.length)].grid_place
-    //console.log(grid[10].neighbours())
     queue.push(current)
     grid[current].state = 1
-    //grid[current].wall[1] = 0
-    //current.wall[1] = 0
-    
 
-    //next_node = choose_node(bias)
-    
-    
 }
 
 // function that loops
 function draw() {
-    background(220);
+    background(theme[0]);
     for (var i = 0; i < grid.length; i++) {
         grid[i].show();
     }
-    //grid[1].wall[1] = 0
+    
     if (queue.length === 0) noLoop()
     carve_path();
     
@@ -59,14 +55,14 @@ function Node(i, j) {
     this.j = j;
     this.state = 0 // if is visited
     this.wall = [1,1,1,1] // top, right, bottom, left
-    this.grid_place = this.j * ROWS + this.i
+    this.grid_place = this.j * ROWS + this.i //index in grid
 
 
     this.show = function() {
         var x = this.i * CELL_SIZE;
         var y = this.j * CELL_SIZE;
-        stroke(10);
-        strokeWeight(1.5);
+        stroke(theme[1]);
+        strokeWeight(theme[2]);
         var padding = CELL_SIZE*1
         if (this.wall[0] == 1) line(x, y, x + padding, y); // top
         if (this.wall[1] == 1) line(x + padding, y, x + padding, y + padding); // right 
@@ -77,33 +73,19 @@ function Node(i, j) {
     }
 
     this.neighbours = function() {
+        // first check if is a valid index and then check if neighbour is in the same 
+        // col/row and has not been visited
 
         var n_col = [this.grid_place-COLS, this.grid_place+COLS];
-        //console.log('col1', n_col)
         n_col = n_col.filter(item => (item > 0  && item < grid.length))
         n_col = n_col.filter(item => (grid[item].i == this.i && grid[item].state == 0))
-        /*var n_col2 = []
-        for (var i = 0; i < n_col.length; i++) {
-            index = n_col[i]
-            if (grid[index].i == this.i && grid[index].state == 0)
-                n_col2.push(index)
-        }*/
 
         var n_row = [this.grid_place-1, this.grid_place+1]
         n_row = n_row.filter(item => (item >= 0  && item < grid.length))
         n_row = n_row.filter(item => (grid[item].j == this.j && grid[item].state == 0))
-        //grid[item].j == this.j && grid[item].state == 0
-        /*n_row2 = []
-        for (var i = 0; i < n_row.length; i++) {
-            index = n_row[i]
-            if (grid[index].j == this.j && grid[index].state == 0)
-                n_row2.push(index)
-        }*/
-
-
-
+   
         a = n_col.concat(n_row)
-        //console.log('a' , a)
+        
         return a
     }
 
@@ -111,6 +93,14 @@ function Node(i, j) {
 
 function choose_element_of_queue(bias) {
     if (bias == 'N') return (queue.length - 1)
+    else if (bias == 'R') return get_random_int(0, queue.length - 1)
+    else if (bias == 'O') return 0
+    else if (bias == 'M') return floor((queue.length-1)/2)
+    else if (bias == 'N/R(75/25)') {
+        rnd = get_random_int(1, 5)
+        if (rnd == 1) return get_random_int(0, queue.length - 1)
+        else return (queue.length - 1)
+    }
 }
 
 // return int random between min (inclusive) and max (exclusive)
@@ -142,16 +132,16 @@ function shuffle_array(array) {
 
 function carve_path() {
     
-    var index = choose_element_of_queue(bias_list[0]) // index of queue
+    var index = choose_element_of_queue(bias_list[4]) // index of queue
     
     if (queue.length == 0) return
     current = queue[index]
     console.log(current)
-    n = grid[current].neighbours() 
+    n = grid[current].neighbours()
     
     if (!(n.length === 0)) {
         var rand = get_random_int(0, n.length - 1);
-        //console.log(n, rand)
+        
         next_node = n[rand];
         
         grid[next_node].state = 1
@@ -162,15 +152,12 @@ function carve_path() {
             grid[next_node].wall[next_wall] = 0
         }
         queue.push(next_node)
-        //return [curr_wall, next_wall]
+        
     }
     else {
-        //console.log('remove', index)
+        // no unvisited neighbours, remove from queue
         queue.splice(index, 1)
-        //return []
-        //console.log('queue rem',queue.length)
     }
-    //console.log('----')
 }
 
 
@@ -180,9 +167,7 @@ function keyPressed() {
 
 function remove_walls(curr, next) {
     // find what walls to remove between current and next_node
-    //console.log('curr, next', current, next_node)
     if (curr == next-1) { // right
-        //console.log('yes')
         return [1, 3]
     }
     else if (curr == next+1) { // left
@@ -194,6 +179,7 @@ function remove_walls(curr, next) {
     else if (curr + COLS == next) { // left
         return [2, 0]
     }
+    // protection measure, not supposed to happen
     return [0, 0]
     
 }
