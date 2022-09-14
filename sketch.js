@@ -1,9 +1,9 @@
 // Daniel Pereira
 // Growing Tree algorithm
 
-const CELL_SIZE = 40; // px
-const ROWS = 19;
-const COLS  = 19;
+var CELL_SIZE = 20; // px
+var ROWS = 5;
+var COLS  = 5;
 var grid = []; // matrix
 var queue = []; // backtracking queue
 var current; // current cell being visited
@@ -15,12 +15,31 @@ var bias_list = ['N', 'R', 'O', 'M', 'N/R(75/25)'];
     // M - Middle
     // N/R(75/25) Newest/Random, 75/25 split
 
-var theme = [220, 10, 4] // background, stroke color, stroke weight
+var theme = [255, 10, 4] // background, stroke color, stroke weight
+
+
+document.getElementById("submit").onclick = function() {
+    var row_input = int(document.getElementById("row_input").value)
+    var col_input = int(document.getElementById("col_input").value)
+    var url = URL_add_parameter(location.href, 'rows', row_input.toString())
+    url = URL_add_parameter(url, 'cols', col_input.toString())
+    console.log(url)
+    window.location = url
+}
 
 
 function setup() {
     
-    //user_input()
+    // get params from url
+    var url = window.location.search;
+    //console.log(url)
+    var urlParams = new URLSearchParams(url)
+    var row_param = urlParams.get('rows')
+    var col_param = urlParams.get('cols')
+    //console.log(row_param == null)
+    if (!(row_param == null)) ROWS = int(row_param)
+    if (!(col_param == null)) COLS = int(col_param)
+    console.log(ROWS, COLS)
 
     createCanvas(COLS*CELL_SIZE, ROWS*CELL_SIZE);
 
@@ -81,7 +100,7 @@ function Node(i, j) {
         // col/row and has not been visited
 
         var n_col = [this.grid_place-COLS, this.grid_place+COLS];
-        n_col = n_col.filter(item => (item > 0  && item < grid.length))
+        n_col = n_col.filter(item => (item >= 0  && item < grid.length))
         n_col = n_col.filter(item => (grid[item].i == this.i && grid[item].state == 0))
 
         var n_row = [this.grid_place-1, this.grid_place+1]
@@ -188,4 +207,30 @@ function remove_walls(curr, next) {
     
 }
 
+function URL_add_parameter(url, param, value){
+    var hash       = {};
+    var parser     = document.createElement('a');
+
+    parser.href    = url;
+
+    var parameters = parser.search.split(/\?|&/);
+
+    for(var i=0; i < parameters.length; i++) {
+        if(!parameters[i])
+            continue;
+
+        var ary      = parameters[i].split('=');
+        hash[ary[0]] = ary[1];
+    }
+
+    hash[param] = value;
+
+    var list = [];  
+    Object.keys(hash).forEach(function (key) {
+        list.push(key + '=' + hash[key]);
+    });
+
+    parser.search = '?' + list.join('&');
+    return parser.href;
+}
 
