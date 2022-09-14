@@ -1,9 +1,9 @@
 // Daniel Pereira
 // Growing Tree algorithm
 // todo does not work if not a square
-const CELL_SIZE = 20; // px
-const ROWS = 20;
-const COLS  = 20;
+const CELL_SIZE = 40; // px
+const ROWS = 40;
+const COLS  = 40;
 var grid = []; // matrix
 var queue = []; // backtracking queue
 var current; // current cell being visited
@@ -132,11 +132,11 @@ function shuffle_array(array) {
 
 function carve_path() {
     
-    var index = choose_element_of_queue(bias_list[4]) // index of queue
+    var index = choose_element_of_queue(bias_list[0]) // index of queue
     
     if (queue.length == 0) return
     current = queue[index]
-    console.log(current)
+    //console.log(current)
     n = grid[current].neighbours()
     
     if (!(n.length === 0)) {
@@ -162,7 +162,7 @@ function carve_path() {
 
 
 function keyPressed() {
-    noLoop();
+    if (keyCode === ESCAPE) noLoop();
 }
 
 function remove_walls(curr, next) {
