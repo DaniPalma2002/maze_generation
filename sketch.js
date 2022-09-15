@@ -41,8 +41,8 @@ function setup() {
     if (!(row_param == null)) ROWS = int(row_param)
     if (!(col_param == null)) COLS = int(col_param)
     //console.log(ROWS, COLS)
-
     createCanvas(COLS*CELL_SIZE, ROWS*CELL_SIZE);
+    
 
     for (var i = 0; i < ROWS; i++) {
         for (var j = 0; j < COLS; j++) {
@@ -251,7 +251,7 @@ function URL_add_parameter(url, param, value){
 }
 
 function choose_start_and_end() {
-    let start = 0
+    //let start = 0
     let end = grid.length-1
     //let n_flag = false
     fill(0, 255, 0)
@@ -259,12 +259,12 @@ function choose_start_and_end() {
     ellipse(CELL_SIZE/2, CELL_SIZE/2, CELL_SIZE/2)
 
     // find a dead end
-    for (var k=0; k < grid.length; k++) {
-        console.log(grid[k].number_of_walls(), k)
-        if (grid[k].i >= floor(COLS/2) && grid[k].j >= floor(ROWS/2)) {
+    for (var k=grid.length-1; k >= 0; k--) {
+        //console.log(grid[k].number_of_walls(), k)
+        if (grid[k].i > floor(COLS/1.7) && grid[k].j > floor(ROWS/1.7)) {
             //console.log('b')
             if (grid[k].number_of_walls() == 3) {
-                console.log('c', k)
+                //console.log('c', k)
                 fill(255, 0, 0)
                 let end_i = grid[k].i * CELL_SIZE
                 let end_j = grid[k].j * CELL_SIZE
@@ -279,7 +279,7 @@ function choose_start_and_end() {
     let end_j = grid[end].j * CELL_SIZE
 
     fill(255, 0, 0)
-    console.log('a')
+    //console.log('a')
     ellipse(end_i + CELL_SIZE/2, end_j + CELL_SIZE/2, CELL_SIZE/2)
     //} 
 }
