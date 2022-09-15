@@ -1,30 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/addons/p5.sound.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <meta charset="utf-8" />
+    <head>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/addons/p5.sound.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <meta charset="utf-8" />
+    </head>
+    <body> 
+        <label for="row_input">Rows</label>
+        <input type="text" id="row_input"><br>
+        <label for="col_input">Columns</label>
+        <input type="text" id="col_input"><br>
+        
+		
+        <form id="algorithm">
+			<label>Choose an algorithm</label>
+            <select id="alg_sel"></select>
+        </form>
 
-  </head>
-  <body>
-    
-    <label for="row_input">Rows</label>
-    <input type="text" id="row_input"
-      onkeypress="restrictAlphabets(event)"><br>
-    <label for="col_input">Collumns</label>
-    <input type="text" id="col_input"><br>
-    <button id="submit">New Maze</button><br>
-    <br>
-    <script type="text/javascript">
-      function restrictAlphabets(e) {
-        var ch = String.fromCharCode(e.which);
-        if (!(/[0-9]/.test(ch))) {
-          e.preventDefault();
-        }
-      }
-    </script>
-    <script src="sketch.js"></script>
-    <script src="support.js"></script>
-  </body>
+		<button id="submit">New Maze</button><br>
+        <br>
+        <script src="sketch.js"></script>
+        <script src="support.js"></script>
+    </body>
 </html>

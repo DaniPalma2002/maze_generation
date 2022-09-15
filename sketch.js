@@ -8,7 +8,7 @@ var grid = []; // matrix
 var queue = []; // backtracking queue
 var current; // current cell being visited
 var next_node;
-var bias_list = ['N', 'R', 'O', 'M', 'N/R(75/25)']; 
+var bias_list = ['Recursive Backtracker(newest)', 'Prim(random)', 'Oldest', 'Middle', 'Newest/Random(75/25)']; 
     // N - Recursive backtracker - newest
     // R - Prim - random
     // O - Oldest
@@ -19,22 +19,38 @@ var bias = bias_list[0]
 var theme = [255, 10, 2] // background, stroke color, stroke weight
 
 
-document.getElementById("submit").onclick = function() {
-    var row_input = int(document.getElementById("row_input").value)
-    var col_input = int(document.getElementById("col_input").value)
-    var url = URL_add_parameter(location.href, 'rows', row_input.toString())
-    url = URL_add_parameter(url, 'cols', col_input.toString())
-    console.log(url)
-    window.location = url
+var dropdown = document.getElementById('alg_sel');
+for(var i = 0; i < bias_list.length; i++) {
+    var opt = bias_list[i];
+    var el = document.createElement("option");
+    el.textContent = opt;
+    el.value = i;
+    dropdown.appendChild(el);
 }
 
+
+
+
+// when click button to generate maze
+document.getElementById("submit").onclick = function() {
+    var row_input = (document.getElementById("row_input").value)
+    var col_input = (document.getElementById("col_input").value)
+    var alg_input = document.getElementById('alg_sel')
+    var alg_value = alg_input.value
+    if (check_valid_input(row_input) && check_valid_input(col_input)) {
+        row_input = int(row_input)
+        col_input = int(col_input)
+        var url = URL_add_parameter(location.href, 'rows', row_input.toString())
+        url = URL_add_parameter(url, 'cols', col_input.toString())
+        url = URL_add_parameter(url, 'alg', alg_value.toString())
+        window.location = url
+    }
+}
+// click enter to click button
 var row_input = document.getElementById('row_input')
 row_input.addEventListener("keyup", () => {
     if(keyCode===13){submit.click()}
 })
-/*row_input.addEventListener("keyup", () => {
-    return restrictAlphabets()
-})*/
 var col_input = document.getElementById('col_input')
 col_input.addEventListener("keyup", () => {
     if(keyCode===13){submit.click()}
@@ -46,14 +62,15 @@ function setup() {
     
     // get params from url
     var url = window.location.search;
-    //console.log(url)
     var urlParams = new URLSearchParams(url)
     var row_param = urlParams.get('rows')
     var col_param = urlParams.get('cols')
-    //console.log(row_param == null)
+    var alg_param = urlParams.get('alg')
     if (!(row_param == null)) ROWS = int(row_param)
     if (!(col_param == null)) COLS = int(col_param)
-    //console.log(ROWS, COLS)
+    bias = bias_list[int(alg_param)]
+    dropdown.value = int(alg_param)
+
     createCanvas(COLS*CELL_SIZE, ROWS*CELL_SIZE);
     
 
@@ -143,11 +160,11 @@ function Node(i, j) {
 }
 
 function choose_element_of_queue() {
-    if (bias == 'N') return (queue.length - 1)
-    else if (bias == 'R') return floor(random(queue.length))
-    else if (bias == 'O') return 0
-    else if (bias == 'M') return floor((queue.length-1)/2)
-    else if (bias == 'N/R(75/25)') {
+    if (bias == bias_list[0]) return (queue.length - 1)
+    else if (bias == bias_list[1]) return floor(random(queue.length))
+    else if (bias == bias_list[2]) return 0
+    else if (bias == bias_list[3]) return floor((queue.length-1)/2)
+    else if (bias == bias_list[4]) {
         rnd = floor(random(1, 5))
         if (rnd == 1) return floor(random(queue.length))
         else return (queue.length - 1)
@@ -297,9 +314,18 @@ function choose_start_and_end() {
     //} 
 }
 
-function restrictAlphabets() {
-    var x = e.which || e.keyCode;
-    if ((x >= 48 && x <= 57))
-      return true;
-    else return false;
+function check_valid_input(str) {
+    if (str === "") {
+        return false
+    }
+    if (!isNaN(str)) {
+        return true
+    }
+    return false
+}
+
+function bias_index() {
+    for (var i = 0; i < bias_list.length; i++)
+        if (bias_list[i] === bias)
+            return i
 }
