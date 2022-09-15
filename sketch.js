@@ -28,6 +28,19 @@ document.getElementById("submit").onclick = function() {
     window.location = url
 }
 
+var row_input = document.getElementById('row_input')
+row_input.addEventListener("keyup", () => {
+    if(keyCode===13){submit.click()}
+})
+/*row_input.addEventListener("keyup", () => {
+    return restrictAlphabets()
+})*/
+var col_input = document.getElementById('col_input')
+col_input.addEventListener("keyup", () => {
+    if(keyCode===13){submit.click()}
+})
+
+
 
 function setup() {
     
@@ -282,4 +295,11 @@ function choose_start_and_end() {
     //console.log('a')
     ellipse(end_i + CELL_SIZE/2, end_j + CELL_SIZE/2, CELL_SIZE/2)
     //} 
+}
+
+function restrictAlphabets() {
+    var x = e.which || e.keyCode;
+    if ((x >= 48 && x <= 57))
+      return true;
+    else return false;
 }

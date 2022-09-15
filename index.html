@@ -10,11 +10,20 @@
   <body>
     
     <label for="row_input">Rows</label>
-    <input type="number" id="row_input" onkeyup="if(event.keyCode===13){submit.click()}"><br>
+    <input type="text" id="row_input"
+      onkeypress="restrictAlphabets(event)"><br>
     <label for="col_input">Collumns</label>
-    <input type="number" id="col_input" onkeyup="if(event.keyCode===13){submit.click()}"><br>
+    <input type="text" id="col_input"><br>
     <button id="submit">New Maze</button><br>
     <br>
+    <script type="text/javascript">
+      function restrictAlphabets(e) {
+        var ch = String.fromCharCode(e.which);
+        if (!(/[0-9]/.test(ch))) {
+          e.preventDefault();
+        }
+      }
+    </script>
     <script src="sketch.js"></script>
     <script src="support.js"></script>
   </body>
