@@ -17,6 +17,7 @@ canvas {
 label {
     padding: 10px;
     margin-bottom: 5px;
+    font-size: 95%;
 }
 
 input {
