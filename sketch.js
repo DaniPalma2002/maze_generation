@@ -16,7 +16,7 @@ var bias_list = ['Recursive Backtracker(newest)', 'Prim(random)', 'Oldest', 'Mid
     // N/R(75/25) Newest/Random, 75/25 split
 var bias = bias_list[0]
 
-var theme = [255, 10, 2] // background, stroke color, stroke weight
+var theme = [255, 10, 1.5] // background, stroke color, stroke weight
 
 
 var dropdown = document.getElementById('alg_sel');
@@ -33,15 +33,23 @@ for(var i = 0; i < bias_list.length; i++) {
 
 // when click button to generate maze
 document.getElementById("submit").onclick = function() {
-    var row_input = (document.getElementById("row_input").value)
-    var col_input = (document.getElementById("col_input").value)
+    var row_input = document.getElementById("row_input").value
+    var col_input = document.getElementById("col_input").value
+    var cell_input = document.getElementById("cell_input").value
+    var wall_input = document.getElementById("wall_input").value
     var alg_input = document.getElementById('alg_sel')
     var alg_value = alg_input.value
-    if (check_valid_input(row_input) && check_valid_input(col_input)) {
+
+    if (check_valid_input(row_input) && check_valid_input(col_input)
+        && check_valid_input(cell_input) && check_valid_input(wall_input)) {
         row_input = int(row_input)
         col_input = int(col_input)
+        cell_input = int(cell_input)
+        wall_input = int(wall_input)
         var url = URL_add_parameter(location.href, 'rows', row_input.toString())
         url = URL_add_parameter(url, 'cols', col_input.toString())
+        url = URL_add_parameter(url, 'cell', cell_input.toString())
+        url = URL_add_parameter(url, 'wall', wall_input.toString())
         url = URL_add_parameter(url, 'alg', alg_value.toString())
         window.location = url
     }
@@ -55,6 +63,14 @@ var col_input = document.getElementById('col_input')
 col_input.addEventListener("keyup", () => {
     if(keyCode===13){submit.click()}
 })
+var cell_input = document.getElementById('cell_input')
+cell_input.addEventListener("keyup", () => {
+    if(keyCode===13){submit.click()}
+})
+var wall_input = document.getElementById('wall_input')
+wall_input.addEventListener("keyup", () => {
+    if(keyCode===13){submit.click()}
+})
 
 
 
@@ -65,11 +81,31 @@ function setup() {
     var urlParams = new URLSearchParams(url)
     var row_param = urlParams.get('rows')
     var col_param = urlParams.get('cols')
+    var cell_param = urlParams.get('cell')
+    var wall_param = urlParams.get('wall')
     var alg_param = urlParams.get('alg')
-    if (!(row_param == null)) ROWS = int(row_param)
-    if (!(col_param == null)) COLS = int(col_param)
-    bias = bias_list[int(alg_param)]
-    dropdown.value = int(alg_param)
+    if (!(row_param == null)) {
+        ROWS = int(row_param)
+        document.getElementById("row_input").value = row_param
+    }
+    if (!(col_param == null)) {
+        COLS = int(col_param)
+        document.getElementById("col_input").value = col_param
+    }
+    if (!(cell_param == null)) {
+        CELL_SIZE = int(cell_param)
+        document.getElementById("cell_input").value = cell_param
+    }
+    if (!(wall_param == null)) {
+        theme[2] = int(wall_param)
+        document.getElementById("wall_input").value = wall_param
+    }
+    if (!(alg_param == null)) {
+        bias = bias_list[int(alg_param)]
+        dropdown.value = int(alg_param)
+    }
+    //bias = bias_list[int(alg_param)]
+    //dropdown.value = int(alg_param)
 
     createCanvas(COLS*CELL_SIZE, ROWS*CELL_SIZE);
     
