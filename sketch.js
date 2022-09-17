@@ -19,6 +19,9 @@ var bias = bias_list[0]
 var theme = [255, 10, 1.5] // background, stroke color, stroke weight
 
 
+var end // destination of maze
+var is_generated = false // flag to check if can start solving the maze
+
 var dropdown = document.getElementById('alg_sel');
 for(var i = 0; i < bias_list.length; i++) {
     var opt = bias_list[i];
@@ -132,7 +135,8 @@ function draw() {
     }
     
     if (queue.length === 0) {
-        noLoop()
+        //noLoop()
+        is_generated = true
         choose_start_and_end()
     }
     carve_path();
@@ -150,6 +154,8 @@ function Node(i, j) {
     this.wall = [1,1,1,1] // top, right, bottom, left
     this.grid_place = this.j * COLS + this.i //index in grid
     this.number_of_neighbours = 0
+    // used to solve maze after generated
+    this.manual_visited = 0
 
     this.show = function() {
         var x = this.i * CELL_SIZE;
@@ -161,8 +167,8 @@ function Node(i, j) {
         if (this.wall[1] == 1) line(x + padding, y, x + padding, y + padding); // right 
         if (this.wall[2] == 1) line(x, y + padding, x + padding, y + padding); // bottom
         if (this.wall[3] == 1) line(x, y, x, y + padding); // left
-        /*if (this.state == 1)  {
-        }*/
+        
+        
     }
 
     this.neighbours = function() {
@@ -191,6 +197,10 @@ function Node(i, j) {
         var arr = this.wall
         arr.forEach(i => (i === 1 && count++))
         return count
+    }
+
+    this.is_stop_node = function() {
+        return this.number_of_walls() === 3 || this.number_of_walls() === 1
     }
 
 }
@@ -268,6 +278,10 @@ function carve_path() {
 
 function keyPressed() {
     if (keyCode === ESCAPE) noLoop();
+    if (keyCode === UP_ARROW && is_generated === true) solveMaze('up')
+    if (keyCode === DOWN_ARROW) solveMaze('down')
+    if (keyCode === RIGHT_ARROW) solveMaze('right')
+    if (keyCode === LEFT_ARROW) solveMaze('left')
 }
 
 function remove_walls(curr, next) {
@@ -317,30 +331,24 @@ function URL_add_parameter(url, param, value){
 }
 
 function choose_start_and_end() {
-    //let start = 0
-    let end = grid.length-1
-    //let n_flag = false
+
+    end = grid.length-1
     fill(0, 255, 0)
     noStroke()
     ellipse(CELL_SIZE/2, CELL_SIZE/2, CELL_SIZE/2)
 
     // find a dead end
     for (var k=grid.length-1; k >= 0; k--) {
-        //console.log(grid[k].number_of_walls(), k)
         if (grid[k].i > floor(COLS/1.7) && grid[k].j > floor(ROWS/1.7)) {
-            //console.log('b')
             if (grid[k].number_of_walls() == 3) {
-                //console.log('c', k)
                 fill(255, 0, 0)
                 let end_i = grid[k].i * CELL_SIZE
                 let end_j = grid[k].j * CELL_SIZE
                 ellipse(end_i + CELL_SIZE/2, end_j + CELL_SIZE/2, CELL_SIZE/2)
-                //n_flag = true
                 return
             }
         }
     }
-    //if (!n_flag){
     let end_i = grid[end].i * CELL_SIZE
     let end_j = grid[end].j * CELL_SIZE
 
@@ -364,4 +372,8 @@ function bias_index() {
     for (var i = 0; i < bias_list.length; i++)
         if (bias_list[i] === bias)
             return i
+}
+
+function solve_maze(direction) {
+
 }
