@@ -161,6 +161,8 @@ function draw() {
         if (check_win()) {
             console.log('end')
             noLoop()
+            /*for (var i = 0; i < grid.length; i++)
+                console.log(i, grid[i].prev_neigh_for_line().grid_place)*/
         }
         automatic_manual_solver()
         
@@ -198,12 +200,14 @@ function Node(i, j) {
             
             //fill(0,255,255)
             let prev_neigh = this.prev_neigh_for_line()
-            console.log(prev_neigh.grid_place)
-            let x1 = prev_neigh.i * CELL_SIZE
-            let y1 = prev_neigh.j * CELL_SIZE
-            fill(0,0,255)
-            line(x1+CELL_SIZE/2, y1+CELL_SIZE/2, this.i*CELL_SIZE+CELL_SIZE/2,
-                    this.j*CELL_SIZE+CELL_SIZE/2)
+            console.log(prev_neigh)
+            for (let neigh in prev_neigh) {
+                let x1 = neigh.i * CELL_SIZE
+                let y1 = neigh.j * CELL_SIZE
+                fill(0,0,255)
+                line(x1+CELL_SIZE/2, y1+CELL_SIZE/2, this.i*CELL_SIZE+CELL_SIZE/2,
+                        this.j*CELL_SIZE+CELL_SIZE/2)
+            }
             circle(x+CELL_SIZE/2, y+CELL_SIZE/2, 10)
             if (this.grid_place == manual_current.grid_place) {
                 fill(0,0,255)
@@ -252,10 +256,14 @@ function Node(i, j) {
 
     this.prev_neigh_for_line = function() {
         var a = this.all_neighbours_with_path()
-        for (let i of a) {
-            if (grid[i].manual_visited == 1)
-                return grid[i]
+        
+        for (var i = 0; i < a.length; i++) {
+            if (grid[a[i]].manual_visited == 0) {
+                //console.log(this.grid_place, i)
+                a.splice(i, 1)
+            }
         }
+        return a
     }
 
     this.number_of_walls = function() {
@@ -266,8 +274,8 @@ function Node(i, j) {
     }
     // places with multiple possible paths
     this.is_stop_node = function() {
-        return true/*this.number_of_walls() === 3 || this.number_of_walls() === 1 ||
-        this.number_of_walls() === 0*/
+        return this.number_of_walls() === 3 || this.number_of_walls() === 1 ||
+        this.number_of_walls() === 0
     }
 
     this.index_to_wall_pos = function(index) {
