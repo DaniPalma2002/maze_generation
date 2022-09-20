@@ -6,8 +6,14 @@ var ROWS = 10;
 var COLS  = 10;
 var grid = []; // matrix
 var queue = []; // backtracking queue
+
 var current; // current cell being visited
 var next_node;
+
+var manual_current; // current cell manually visited
+var manual_prev; 
+var forwards = true; // flag for manual maze solving
+
 var bias_list = ['Recursive Backtracker(newest)', 'Prim(random)', 'Oldest', 'Middle', 'Newest/Random(75/25)']; 
     // N - Recursive backtracker - newest
     // R - Prim - random
@@ -125,24 +131,44 @@ function setup() {
     queue.push(current)
     grid[current].state = 1
 
+    manual_current = grid[0]
+    manual_current.manual_visited = 1
+
 }
 
 // function that loops
 function draw() {
     background(theme[0]);
+    // draw maze
     for (var i = 0; i < grid.length; i++) {
         grid[i].show();
     }
-    
+
+    // while generating maze
+    if (queue.length !== 0)
+        carve_path();
+
     if (queue.length === 0) {
         //noLoop()
         is_generated = true
         choose_start_and_end()
     }
-    carve_path();
     
+    // solving the maze
+    if (is_generated === true) {
+        //console.log(manual_current.grid_place, end)
+        // check win
+        if (check_win()) {
+            console.log('end')
+            noLoop()
+        }
+        automatic_manual_solver()
+        
+    }
     
 }
+    
+
 
 //------------------------------------------------------------------------------
 
@@ -156,6 +182,7 @@ function Node(i, j) {
     this.number_of_neighbours = 0
     // used to solve maze after generated
     this.manual_visited = 0
+    
 
     this.show = function() {
         var x = this.i * CELL_SIZE;
@@ -167,7 +194,23 @@ function Node(i, j) {
         if (this.wall[1] == 1) line(x + padding, y, x + padding, y + padding); // right 
         if (this.wall[2] == 1) line(x, y + padding, x + padding, y + padding); // bottom
         if (this.wall[3] == 1) line(x, y, x, y + padding); // left
+        if (this.manual_visited == 1 && this.grid_place !== 0) {
+            
+            //fill(0,255,255)
+            let prev_neigh = this.prev_neigh_for_line()
+            console.log(prev_neigh.grid_place)
+            let x1 = prev_neigh.i * CELL_SIZE
+            let y1 = prev_neigh.j * CELL_SIZE
+            fill(0,0,255)
+            line(x1+CELL_SIZE/2, y1+CELL_SIZE/2, this.i*CELL_SIZE+CELL_SIZE/2,
+                    this.j*CELL_SIZE+CELL_SIZE/2)
+            circle(x+CELL_SIZE/2, y+CELL_SIZE/2, 10)
+            if (this.grid_place == manual_current.grid_place) {
+                fill(0,0,255)
+                circle(x+CELL_SIZE/2, y+CELL_SIZE/2, 10)
+            }
         
+        }
         
     }
 
@@ -184,6 +227,7 @@ function Node(i, j) {
         n_row = n_row.filter(item => (grid[item].j == this.j && grid[item].state == 0))
    
         a = n_col.concat(n_row)
+        
         this.number_of_neighbours = a.length
         // no unvisited neighbours
         if (a.length === 0) return -1
@@ -192,17 +236,51 @@ function Node(i, j) {
         return a[rand]
     }
 
+    this.all_neighbours_with_path = function() {
+        var a = []
+        if (this.wall[0] == 0)
+            a.push(this.grid_place-COLS)
+        if (this.wall[1] == 0)
+            a.push(this.grid_place+1)
+        if (this.wall[2] == 0)
+            a.push(this.grid_place+COLS)
+        if (this.wall[3] == 0)
+            a.push(this.grid_place-1)
+
+        return a
+    }
+
+    this.prev_neigh_for_line = function() {
+        var a = this.all_neighbours_with_path()
+        for (let i of a) {
+            if (grid[i].manual_visited == 1)
+                return grid[i]
+        }
+    }
+
     this.number_of_walls = function() {
         var count = 0
         var arr = this.wall
         arr.forEach(i => (i === 1 && count++))
         return count
     }
-
+    // places with multiple possible paths
     this.is_stop_node = function() {
-        return this.number_of_walls() === 3 || this.number_of_walls() === 1
+        return true/*this.number_of_walls() === 3 || this.number_of_walls() === 1 ||
+        this.number_of_walls() === 0*/
     }
 
+    this.index_to_wall_pos = function(index) {
+        if (index == 0) // top
+            return this.grid_place - COLS
+        if (index == 1) // right
+            return this.grid_place + 1
+        if (index == 2) // bottom
+            return this.grid_place + COLS
+        if (index == 3) // left
+            return this.grid_place - 1
+        
+    }
 }
 
 function choose_element_of_queue() {
@@ -278,10 +356,12 @@ function carve_path() {
 
 function keyPressed() {
     if (keyCode === ESCAPE) noLoop();
-    if (keyCode === UP_ARROW && is_generated === true) solveMaze('up')
-    if (keyCode === DOWN_ARROW) solveMaze('down')
-    if (keyCode === RIGHT_ARROW) solveMaze('right')
-    if (keyCode === LEFT_ARROW) solveMaze('left')
+    if (is_generated === true && (manual_current.is_stop_node() || manual_current.grid_place == 0)) {
+        if (keyCode === UP_ARROW) solve_maze(0)
+        if (keyCode === DOWN_ARROW) solve_maze(2)
+        if (keyCode === RIGHT_ARROW) solve_maze(1)
+        if (keyCode === LEFT_ARROW) solve_maze(3)
+    }
 }
 
 function remove_walls(curr, next) {
@@ -344,6 +424,7 @@ function choose_start_and_end() {
                 fill(255, 0, 0)
                 let end_i = grid[k].i * CELL_SIZE
                 let end_j = grid[k].j * CELL_SIZE
+                end = k
                 ellipse(end_i + CELL_SIZE/2, end_j + CELL_SIZE/2, CELL_SIZE/2)
                 return
             }
@@ -374,6 +455,65 @@ function bias_index() {
             return i
 }
 
-function solve_maze(direction) {
+function solve_maze(index) {
+    
+    if (manual_current.wall[index] === 0) {
+        let manual_next = grid[manual_current.index_to_wall_pos(index)]
+
+        // go back 
+        if (manual_next.manual_visited == 1) {
+            manual_current.manual_visited = 0
+            forwards = false
+        }
+
+        manual_prev = manual_current
+
+        manual_current = manual_next
+
+        // go to unvisited cells
+        if (manual_current.manual_visited == 0) {
+            manual_current.manual_visited = 1
+            forwards = true
+        }
+        
+    }
+    
+}
+
+function automatic_manual_solver() {
+    
+    //console.log(manual_current.grid_place)
+    if (manual_current.grid_place == 0) {
+        if (manual_current.all_neighbours_with_path().length == 1) {
+            manual_prev = manual_current
+            manual_current = grid[manual_prev.all_neighbours_with_path()[0]]
+            manual_current.manual_visited = 1
+        }
+            
+    }
+    else {
+        let n = manual_current.all_neighbours_with_path()
+        // its a straight path
+        if (n.length === 2) {
+            manual_prev = manual_current
+            for (let i of n) {
+                if (grid[i].manual_visited == 0 && forwards) {
+                    manual_current = grid[i]
+                    manual_current.manual_visited = 1
+                }
+                else if (grid[i].manual_visited == 1 && !forwards) {
+                    manual_prev.manual_visited = 0
+                    manual_current = grid[i]
+                }
+            }
+        }
+
+    }
+}
+
+
+function check_win() {
+    if (manual_current.grid_place === end)
+        return true
 
 }
