@@ -1,32 +1,32 @@
 // Daniel Pereira
 // Growing Tree algorithm
-
-const CELL_SIZE = 15; // px
+const CELL_SIZE = 40; // px
 const ROWS = Math.round(window.innerHeight / CELL_SIZE);
 const COLS = Math.round(window.innerWidth / CELL_SIZE);
 const grid = []; // matrix
 const queue = []; // backtracking queue
 
-var current; // current cell being visited
-var next_node;
+let current; // current cell being visited
+let next_node;
 
-var bias_list = [
+const bias_list = [
 	"Recursive Backtracker(newest)",
 	"Prim(random)",
 	"Oldest",
 	"Middle",
 	"Newest/Random(75/25)",
 ];
-// N - Recursive backtracker - newest
+// neighbour - Recursive backtracker - newest
 // R - Prim - random
 // O - Oldest
 // M - Middle
-// N/R(75/25) Newest/Random, 75/25 split
-var bias = bias_list[0];
+// neighbour/R(75/25) Newest/Random, 75/25 split
+let bias = bias_list[0];
 
-var theme = [200, 10, 1.5]; // background, stroke color, stroke weight
+const theme = [200, 10, 1.5]; // background, stroke color, stroke weight
 
 function setup() {
+	frameRate(120);
 
 	createCanvas(COLS * CELL_SIZE, ROWS * CELL_SIZE);
 
@@ -73,11 +73,11 @@ class Node {
 		this.update = false;
 
 		this.show = function () {
-			var x = this.i * CELL_SIZE;
-			var y = this.j * CELL_SIZE;
+			let x = this.i * CELL_SIZE;
+			let y = this.j * CELL_SIZE;
 			stroke(0,50,100);
 			strokeWeight(10);
-			var padding = CELL_SIZE * 1;
+			let padding = CELL_SIZE * 1;
 			if (this.wall[0] == 1)
 				line(x, y, x + padding, y); // top
 			if (this.wall[1] == 1)
@@ -89,13 +89,12 @@ class Node {
 		};
 
 		this.neighbours = function () {
-			// first check if is a valid index and then check if neighbour is in the same
-			// col/row and has not been visited
-			var n_col = [this.grid_place - COLS, this.grid_place + COLS]
+			// return a random unvisited neighbour
+			let n_col = [this.grid_place - COLS, this.grid_place + COLS]
 				.filter((item) => item >= 0 && item < grid.length 
 						&& grid[item].i == this.i && grid[item].state == 0);	
 
-			var n_row = [this.grid_place - 1, this.grid_place + 1]
+			let n_row = [this.grid_place - 1, this.grid_place + 1]
 				.filter((item) => item >= 0 && item < grid.length
 						&& grid[item].j == this.j && grid[item].state == 0);		
 
@@ -127,26 +126,24 @@ function choose_element_of_queue() {
 }
 
 function carve_path() {
-	var index = choose_element_of_queue(bias); // index of queue
+	let index = choose_element_of_queue(bias); // index of queue
 
 	if (queue.length == 0) return;
 	current = queue[index];
-	n = grid[current].neighbours();
+	neighbour = grid[current].neighbours();
 
-	if (!(n == -1)) {
-		next_node = n;
-
-		grid[next_node].state = 1;
-		var curr_wall, next_wall;
-		[curr_wall, next_wall] = remove_walls(current, next_node);
+	if (!(neighbour == -1)) {
+		grid[neighbour].state = 1;
+		let curr_wall, next_wall;
+		[curr_wall, next_wall] = remove_walls(current, neighbour);
 		if (!(curr_wall == 0 && next_wall == 0)) {
 			grid[current].wall[curr_wall] = 0;
-			grid[next_node].wall[next_wall] = 0;
+			grid[neighbour].wall[next_wall] = 0;
 			grid[current].update = true;
-			grid[next_node].update = true;
+			grid[neighbour].update = true;
 		}
 		
-		queue.push(next_node);
+		queue.push(neighbour);
 	} else {
 		// no unvisited neighbours, remove from queue
 		if (bias == bias_list[0]) {
@@ -177,5 +174,13 @@ function remove_walls(curr, next) {
 }
 
 function keyPressed() {
+	// if keycode escape -> noLoop
+	if (keyCode === 27) {
+		noLoop();
+	}
+	// if keycode space -> reset
+	if (keyCode === 32) {
+		setup();
+	}
 }
 
