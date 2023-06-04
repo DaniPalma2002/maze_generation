@@ -1,6 +1,6 @@
 // Daniel Pereira
 // Growing Tree algorithm
-const CELL_SIZE = 40; // px
+const CELL_SIZE = 15; // px
 const ROWS = Math.round(window.innerHeight / CELL_SIZE);
 const COLS = Math.round(window.innerWidth / CELL_SIZE);
 const grid = []; // matrix
